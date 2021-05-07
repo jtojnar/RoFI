@@ -17,9 +17,9 @@ TEST_CASE( "Base RigidJoint" ) {
     // ToDo: Write the test
     auto j = rofi::RigidJoint( rotate( M_PI_2, { 1, 0, 0, 1 } ) * translate( { 20, 0, 0 } ) );
     CHECK( equals( j.sourceToDest(), { { 1, 0,  0, 20 }
-	                                 , { 0, 0, -1,  0 }
-									 , { 0, 1,  0,  0 }
-									 , { 0, 0,  0,  1 } } ) );
+                                     , { 0, 0, -1,  0 }
+                                     , { 0, 1,  0,  0 }
+                                     , { 0, 0,  0,  1 } } ) );
     CHECK( equals( j.sourceToDest() * j.destToSource(), identity ) );
 }
 
@@ -29,7 +29,7 @@ TEST_CASE( "Base RotationJoint" ) {
     auto j = rofi::RotationJoint( { 0, 0, 0 }, { 0, 0, 0 }, { 1, 0, 0 }, { 1, 0, 0 }, -M_PI_2, M_PI_2 );
     std::cout << "joint created is " << j << "\n";
     j.positions = { 0 * M_PI }; // set the angle of the rotation
-	CHECK( equals( j.sourceToDest(), identity ) );
+    CHECK( equals( j.sourceToDest(), identity ) );
     CHECK( equals( j.destToSource(), identity ) );
 }
 

@@ -6,10 +6,10 @@
 namespace {
 
 void printMatrix( Matrix m ) {
-	std::cout << "-------------------\n";
-	std::cout << m << "\n";
-	std::cout << "-------------------\n";
-	/*
+    std::cout << "-------------------\n";
+    std::cout << m << "\n";
+    std::cout << "-------------------\n";
+    /*
     for ( int i = 0; i < m.n_rows; i++ ) {
         for ( int j = 0; j < m.n_cols; j++ ) {
             std::cout << round( m(i, j) ) << " ";
@@ -17,7 +17,7 @@ void printMatrix( Matrix m ) {
         std::cout << "\n";
     }
     std::cout << "\n";
-	*/
+    */
 }
 
 TEST_CASE( "Base Module Test" ) {}
@@ -29,51 +29,51 @@ TEST_CASE( "Universal Module Test" ) {
         um.setJointParams( 0, { 0, 0, 0 } );
     }
 
-	SECTION( "Position - default" ) {
-		rofi::Module um = rofi::buildUniversalModule( 0, 0, 0 );
-		CHECK( equals( um.getComponentPosition( 6 ), identity ) );
-		CHECK( equals( um.getComponentPosition( 9 ), { { -1, 0,  0, 0 }
-		                                             , {  0, 1,  0, 0 }
-													 , {  0, 0, -1, 1 }
-													 , {  0, 0,  0, 1 } } ) );
-		printMatrix( um.getComponentPosition( 9 ) );
-	}
+    SECTION( "Position - default" ) {
+        rofi::Module um = rofi::buildUniversalModule( 0, 0, 0 );
+        CHECK( equals( um.getComponentPosition( 6 ), identity ) );
+        CHECK( equals( um.getComponentPosition( 9 ), { { -1, 0,  0, 0 }
+                                                     , {  0, 1,  0, 0 }
+                                                     , {  0, 0, -1, 1 }
+                                                     , {  0, 0,  0, 1 } } ) );
+        printMatrix( um.getComponentPosition( 9 ) );
+    }
 
-	SECTION( "Position - rotated" ) {
-		rofi::Module um = rofi::buildUniversalModule( 0, -M_PI_2, M_PI_2 );
-		CHECK( equals( um.getComponentPosition( 6 ), identity ) ); // shoeA
-		CHECK( equals( um.getComponentPosition( 9 ), { { 0 , 0 , -1, 0 } // shoeB
-													 , { -1, 0 , 0 , 0 }
-											   		 , { 0 , 1 , 0 , 1 }
-											   		 , { 0 , 0 , 0 , 1 } } ) );
-		printMatrix( um.getComponentPosition( 9 ) );
-	}
+    SECTION( "Position - rotated" ) {
+        rofi::Module um = rofi::buildUniversalModule( 0, -M_PI_2, M_PI_2 );
+        CHECK( equals( um.getComponentPosition( 6 ), identity ) ); // shoeA
+        CHECK( equals( um.getComponentPosition( 9 ), { { 0 , 0 , -1, 0 } // shoeB
+                                                     , { -1, 0 , 0 , 0 }
+                                                     , { 0 , 1 , 0 , 1 }
+                                                     , { 0 , 0 , 0 , 1 } } ) );
+        printMatrix( um.getComponentPosition( 9 ) );
+    }
 }
 
 TEST_CASE( "Two modules" ) {
-	rofi::Rofibot bot;
-	auto& m1 = bot.insert( rofi::buildUniversalModule( 0, 0, 0 ) );
-	auto& m2 = bot.insert( rofi::buildUniversalModule( 0, 0, 0 ) );
-	connect( m1.connector( 4 ), m2.connector( 1 ), rofi::Orientation::North );
-	// ToDo: fix below
-	// rofi::connect< rofi::RigidJoint >( m1.connector( 1 ), { 0, 0, 0 }, identity );
-	CHECK_NOTHROW( bot.prepare() );
+    rofi::Rofibot bot;
+    auto& m1 = bot.insert( rofi::buildUniversalModule( 0, 0, 0 ) );
+    auto& m2 = bot.insert( rofi::buildUniversalModule( 0, 0, 0 ) );
+    connect( m1.connector( 4 ), m2.connector( 1 ), rofi::Orientation::North );
+    // ToDo: fix below
+    // rofi::connect< rofi::RigidJoint >( m1.connector( 1 ), { 0, 0, 0 }, identity );
+    CHECK_NOTHROW( bot.prepare() );
 
-	SECTION( "ShoesA " ) {
-		CHECK( equals( bot.getModuleOrientation( m1.id ), identity ) );
-		CHECK( equals( bot.getModuleOrientation( m2.id ), identity * translate( { 0, 0, 1 } ) ) );
-	}
-	
-	SECTION( "ShoesB" ) {
-	Matrix m2shoeB = bot.getModuleOrientation( m2.id ) * m2.getComponentPosition( 9 );
-	Matrix m1shoeB = bot.getModuleOrientation( m1.id ) * m1.getComponentPosition( 9 );
-	printMatrix( bot.getModuleOrientation( m2.id ) );
-	CHECK( equals( m1shoeB, { { 0 , 0 , -1, 0 }
+    SECTION( "ShoesA " ) {
+        CHECK( equals( bot.getModuleOrientation( m1.id ), identity ) );
+        CHECK( equals( bot.getModuleOrientation( m2.id ), identity * translate( { 0, 0, 1 } ) ) );
+    }
+
+    SECTION( "ShoesB" ) {
+    Matrix m2shoeB = bot.getModuleOrientation( m2.id ) * m2.getComponentPosition( 9 );
+    Matrix m1shoeB = bot.getModuleOrientation( m1.id ) * m1.getComponentPosition( 9 );
+    printMatrix( bot.getModuleOrientation( m2.id ) );
+    CHECK( equals( m1shoeB, { { 0 , 0 , -1, 0 }
                             , { -1, 0 , 0 , 0 }
                             , { 0 , 1 , 0 , 1 }
                             , { 0 , 0 , 0 , 1 } } ) );
-	CHECK( equals( m2shoeB, m1shoeB * translate( { 0, 0, 1 } ) ) );
-	}
+    CHECK( equals( m2shoeB, m1shoeB * translate( { 0, 0, 1 } ) ) );
+    }
 }
 
 TEST_CASE( "Basic rofibot manipulation" ) {

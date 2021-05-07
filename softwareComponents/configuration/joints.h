@@ -5,10 +5,7 @@
 #include <cassert>
 
 #include <atoms/patterns.hpp>
-#include "Configuration.h"
-
 #include <Matrix.h>
-
 
 namespace rofi {
 

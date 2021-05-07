@@ -30,6 +30,8 @@ enum class ModuleType {
 
 enum class Orientation { North, East, South, West };
 
+double orientationToAngle( Orientation o );
+
 /**
  * \brief Joint between two components of the same module
  */
@@ -70,7 +72,8 @@ struct RoficomJoint: public Joint {
 
     Matrix sourceToDest() const override {
         assert( positions.size() == 0 );
-        return identity; // ToDo: Implement
+        return rotate( orientationToAngle( orientation ), { 0, 1, 0 } )
+					* translate( { 0, 0, -1 } ); // "default" roficom is of id 1
     }
 
     std::pair< double, double > jointLimits( int ) const override {
@@ -155,6 +158,10 @@ public:
             _rootComponent = _computeRoot();
     }
 
+    Module( Module&& o ) noexcept {
+        swap( o );
+    }
+
     Module( const Module& o ):
         id( o.id ),
         type( o.type ),
@@ -233,6 +240,7 @@ public:
 
         if ( !atoms::all( initialized ) )
             throw std::logic_error( "There are components without position" );
+		_componentPosition = std::move( positions );
     }
 
     /**
@@ -331,6 +339,7 @@ private:
  * \brief Collision model ignoring collision
  */
 class NoColision {
+public:
     /**
      * \brief Decide if two modules collide
      */
@@ -344,6 +353,7 @@ class NoColision {
  * shoes
  */
 class SimpleColision {
+public:
     /**
      * \brief Decide if two modules collide
      */
@@ -407,12 +417,20 @@ public:
      * Returns a reference to the newly created module.
      */
     Module& insert( Module m ) {
-        ModuleId id = _modules.insert( { m, {}, {}, {}, std::nullopt } );
+        ModuleId id = _modules.insert( { std::move( m ), {}, {}, {}, std::nullopt } );
         Module* insertedModule = _modules[ id ].module.get();
         insertedModule->id = id;
         insertedModule->parent = this;
         insertedModule->_prepareComponents();
         return *insertedModule;
+    }
+
+	/**
+	 * \brief Get pointer to module with given id within the Rofibot
+	 */
+    Module* getModule( ModuleId id ) const {
+        auto& ref = *_modules[ id ].module.get();
+        return &ref;
     }
 
     /**
@@ -559,6 +577,18 @@ private:
     }
 
     struct ModuleInfo {
+        ModuleInfo() = default;
+        ModuleInfo( const ModuleInfo& ) = default;
+        ModuleInfo( ModuleInfo&& o ) noexcept : module( std::move( o.module ) )
+        , inJointsIdx( std::move( o.inJointsIdx ) ), outJointsIdx( std::move( o.outJointsIdx ) )
+        , spaceJoints( std::move( o.spaceJoints ) ), position( std::move( o.position ) ) {}
+        ModuleInfo( atoms::ValuePtr< Module >&& m, const std::vector< int >& i, const std::vector< int >& o
+                    , const std::vector< int >& s, const std::optional< Matrix >& pos )
+        : module( std::move( m ) ), inJointsIdx( i ), outJointsIdx( o ), spaceJoints( s ), position( pos ) {}
+
+        ModuleInfo& operator=( const ModuleInfo& ) = default;
+        ModuleInfo& operator=( ModuleInfo&& ) = default;
+
         atoms::ValuePtr< Module > module;  // Use value_ptr to make address of modules stable
         std::vector< int > inJointsIdx;
         std::vector< int > outJointsIdx;
@@ -599,14 +629,16 @@ int connect( const Component& c, Vector refpoint, Args&&... args ) {
     Rofibot& bot = *c.parent->parent;
     Rofibot::ModuleInfo& info = bot._modules[ c.parent->id ];
 
-    auto jointId = bot._spaceJoints.insert({
+    auto jointId = bot._spaceJoints.insert( {
         std::make_unique< JointT >( ( std::forward< Args >( args ) )... ),
         refpoint,
         info.module->id,
         info.module->componentIdx( c )
-    });
+	} );
     info.spaceJoints.push_back( jointId );
     bot._prepared = false;
+
+    return jointId;
 }
 
 } // namespace rofi

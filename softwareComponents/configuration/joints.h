@@ -5,6 +5,7 @@
 #include <cassert>
 
 #include <atoms/patterns.hpp>
+#include "Configuration.h"
 
 #include <Matrix.h>
 
@@ -53,6 +54,7 @@ struct Joint: public atoms::VisitableBase< Joint, JointVisitor > {
     }
 
     Positions positions;
+    friend std::ostream& operator<<( std::ostream& out, Joint& j );
 };
 
 struct RigidJoint: public atoms::Visitable< Joint, RigidJoint > {
@@ -99,7 +101,9 @@ struct RotationJoint: public atoms::Visitable< Joint, RotationJoint > {
                    Vector desAxis, double min, double max )
         : _limits( { min, max } )
     {
-        // ToDo: compute _pre, _post, _axis
+        _pre  = rotate( 0, sourceOrigin );
+        _post = rotate( 0, destOrigin );
+        _axis = desAxis - sourceAxis;
     }
 
     /**
@@ -146,6 +150,5 @@ struct RotationJoint: public atoms::Visitable< Joint, RotationJoint > {
  * Provides human readable text description of the joint
  */
 std::ostream& operator<<( std::ostream& out, Joint& j );
-
 
 } // namespace rofi

@@ -194,6 +194,11 @@ run() {
         autoload bashcompinit
         bashcompinit
     fi
+
+    ## For fish completions
+    backup XDG_DATA_DIRS
+    export XDG_DATA_DIRS="$XDG_DATA_DIRS:$ROFI_ROOT/releng/tools"
+
     source releng/tools/_registerCompletion.sh
 }
 

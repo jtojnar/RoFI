@@ -1,0 +1,1 @@
+rcfg.fish

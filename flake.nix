@@ -171,7 +171,7 @@
         packages = pkgs;
 
         # Provides shell environment for development.
-        devShell = self.devShells.${system}.vtk7;
+        devShell = self.devShells.${system}.vtk9;
 
         devShells = {
           vtk7 = mkDevShell {

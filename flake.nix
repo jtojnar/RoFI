@@ -154,6 +154,8 @@
             # TLS certificates so that git can clone GitHub repos.
             GIT_SSL_CAINFO = "${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt";
 
+            ROFI_BUILD_VARIANT = "vtk${pkgs.lib.versions.major vtk.version}";
+
             shellHook = ''
               # Add Qt-related environment variables.
               # https://discourse.nixos.org/t/python-qt-woes/11808/10
